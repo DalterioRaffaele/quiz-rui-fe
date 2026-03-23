@@ -33,6 +33,9 @@ export class QuizComponent implements OnInit {
 
   domande = signal<any[]>([]);
   risposte: string[] = [];
+  risposteCorrette: string[] = [];
+  risultati: ('correct' | 'wrong' | '')[] = [];
+  quizTerminato = false;
 
   domandeCount = computed(() => this.domande().length);
   risposteCompletate = computed(() => this.risposte.filter(r => r).length);
@@ -86,28 +89,79 @@ export class QuizComponent implements OnInit {
   caricaDomande() {
     if (!this.selectedMateria) { alert('Seleziona una materia!'); return; }
     this.apiService.getDomande(this.selectedSettore, this.selectedMateria, this.numDomande).subscribe({
-      next: domande => { this.domande.set(domande); this.risposte = new Array(domande.length).fill(''); },
+      next: domande => {
+        this.domande.set(domande);
+        this.risposte = new Array(domande.length).fill('');
+        this.risultati = new Array(domande.length).fill('');
+        this.quizTerminato = false;
+        this.risposteCorrette = domande.map(d => {
+          const opzioni = d.risposte || d.opzioni || [];
+          const corretta = opzioni.find((op: any) =>
+            op.corretta === true || op.esatta === true || op.correct === true
+          );
+          return corretta ? (corretta.testo || corretta.risposta || '') : '';
+        });
+      },
       error: () => alert('Errore caricamento domande')
     });
   }
 
-  getOpzioni(domanda: any): any[] { return domanda.risposte || domanda.opzioni || []; }
-  getOpzioneTesto(op: any): string { return typeof op === 'string' ? op : (op.testo || op.risposta || ''); }
-  getOpzioneValue(op: any): string { return typeof op === 'string' ? op : (op.testo || op.risposta || JSON.stringify(op)); }
+  getOpzioni(domanda: any): any[] {
+    return domanda.risposte || domanda.opzioni || [];
+  }
 
-  salvaRisposte() { alert('Salvato ' + this.risposteCompletate() + '/' + this.domandeCount() + ' risposte!'); }
-  resetQuiz() { this.domande.set([]); this.risposte = []; this.selectedMateria = ''; }
+  getOpzioneTesto(op: any): string {
+    return typeof op === 'string' ? op : (op.testo || op.risposta || '');
+  }
+
+  getOpzioneValue(op: any): string {
+    return typeof op === 'string' ? op : (op.testo || op.risposta || JSON.stringify(op));
+  }
+
+  selezionaRisposta(index: number, valore: string) {
+    this.risposte[index] = valore;
+    this.risultati[index] = valore === this.risposteCorrette[index] ? 'correct' : 'wrong';
+  }
+
+  get punteggio() {
+    return this.risultati.filter(r => r === 'correct').length;
+  }
+
+  resetQuiz() {
+    this.domande.set([]);
+    this.risposte = [];
+    this.risultati = [];
+    this.risposteCorrette = [];
+    this.quizTerminato = false;
+    this.selectedMateria = '';
+  }
 
   caricaProgressi() {
-    this.apiService.getProgressi().subscribe({ next: p => this.progressi = p, error: () => {} });
+    this.apiService.getProgressi().subscribe({
+      next: (p: Record<string, any>) => this.progressi = p,
+      error: () => {}
+    });
   }
 
   resetProgressi() {
     if (!confirm('Cancellare tutti i progressi?')) return;
-    this.apiService.resetProgressi().subscribe({ next: () => { this.progressi = {}; alert('Progressi cancellati!'); } });
+    this.apiService.resetProgressi().subscribe({
+      next: () => { this.progressi = {}; alert('Progressi cancellati!'); },
+      error: () => alert('Errore reset')
+    });
   }
 
-  get erroriList() { return Object.values(this.progressi).filter((p: any) => p.wrong > 0).sort((a: any, b: any) => b.wrong - a.wrong); }
+  salvaRisposte() {
+  alert('Salvato ' + this.risposteCompletate() + '/' + this.domandeCount() + ' risposte!');
+}
+
+
+  get erroriList() {
+    return Object.values(this.progressi)
+      .filter((p: any) => p.wrong > 0)
+      .sort((a: any, b: any) => b.wrong - a.wrong);
+  }
+
   get statsViste() { return Object.values(this.progressi).filter((p: any) => p.seen).length; }
   get statsCorrette() { return Object.values(this.progressi).reduce((s: number, p: any) => s + (p.correct || 0), 0); }
   get statsErrori() { return Object.values(this.progressi).reduce((s: number, p: any) => s + (p.wrong || 0), 0); }
