@@ -32,13 +32,13 @@ export class QuizComponent implements OnInit {
   numDomande = 9;
 
   domande = signal<any[]>([]);
-  risposte: string[] = [];
+  risposte = signal<string[]>([]);           // ← signal
   risposteCorrette: string[] = [];
-  risultati: ('correct' | 'wrong' | '')[] = [];
+  risultati = signal<('correct' | 'wrong' | '')[]>([]);  // ← signal
   quizTerminato = false;
 
   domandeCount = computed(() => this.domande().length);
-  risposteCompletate = computed(() => this.risposte.filter(r => r).length);
+  risposteCompletate = computed(() => this.risposte().filter(r => r !== '').length);
 
   progressi: Record<string, any> = {};
 
@@ -91,8 +91,8 @@ export class QuizComponent implements OnInit {
     this.apiService.getDomande(this.selectedSettore, this.selectedMateria, this.numDomande).subscribe({
       next: domande => {
         this.domande.set(domande);
-        this.risposte = new Array(domande.length).fill('');
-        this.risultati = new Array(domande.length).fill('');
+        this.risposte.set(new Array(domande.length).fill(''));
+        this.risultati.set(new Array(domande.length).fill(''));
         this.quizTerminato = false;
         this.risposteCorrette = domande.map(d => {
           const opzioni = d.risposte || d.opzioni || [];
@@ -119,18 +119,52 @@ export class QuizComponent implements OnInit {
   }
 
   selezionaRisposta(index: number, valore: string) {
-    this.risposte[index] = valore;
-    this.risultati[index] = valore === this.risposteCorrette[index] ? 'correct' : 'wrong';
+    const r = [...this.risposte()];
+    r[index] = valore;
+    this.risposte.set(r);
+
+    const ris = [...this.risultati()];
+    ris[index] = valore === this.risposteCorrette[index] ? 'correct' : 'wrong';
+    this.risultati.set(ris);
   }
 
   get punteggio() {
-    return this.risultati.filter(r => r === 'correct').length;
+    return this.risultati().filter(r => r === 'correct').length;
+  }
+
+  salvaRisposte() {
+    const completate = this.risposteCompletate();
+    const totale = this.domandeCount();
+    const corrette = this.punteggio;
+
+    // Salva progressi su server
+    const domande = this.domande();
+    const risultatiArr = this.risultati();
+    domande.forEach((d, i) => {
+      if (risultatiArr[i]) {
+        const progressoCorrente = this.progressi[String(d.numero)] || { correct: 0, wrong: 0 };
+        const payload = {
+          numero: d.numero,
+          domanda: d.testo || d.domanda || '',
+          materia: d.materia || '',
+          settore: d.settore || '',
+          seen: true,
+          correct: (progressoCorrente.correct || 0) + (risultatiArr[i] === 'correct' ? 1 : 0),
+          wrong: (progressoCorrente.wrong || 0) + (risultatiArr[i] === 'wrong' ? 1 : 0),
+          lastResult: risultatiArr[i]
+        };
+        this.apiService.saveProgresso(payload).subscribe();
+      }
+    });
+
+    alert(`✅ Salvato! ${corrette}/${totale} corrette (${completate} risposte date)`);
+    this.caricaProgressi();
   }
 
   resetQuiz() {
     this.domande.set([]);
-    this.risposte = [];
-    this.risultati = [];
+    this.risposte.set([]);
+    this.risultati.set([]);
     this.risposteCorrette = [];
     this.quizTerminato = false;
     this.selectedMateria = '';
@@ -150,11 +184,6 @@ export class QuizComponent implements OnInit {
       error: () => alert('Errore reset')
     });
   }
-
-  salvaRisposte() {
-  alert('Salvato ' + this.risposteCompletate() + '/' + this.domandeCount() + ' risposte!');
-}
-
 
   get erroriList() {
     return Object.values(this.progressi)

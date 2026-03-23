@@ -34,6 +34,7 @@
         <input type="number" [(ngModel)]="numDomande" min="1" max="100" class="input-field small" />
         <button class="action-btn" (click)="caricaDomande()" [disabled]="!selectedMateria">Inizia quiz</button>
       </div>
+
       <div class="grid" *ngIf="domande().length">
         <div *ngFor="let domanda of domande(); trackBy: trackByIndex; let i = index" class="card domanda-card">
           <div class="topline">
@@ -42,26 +43,25 @@
           </div>
           <p><strong>{{ domanda.testo || domanda.domanda }}</strong></p>
           <div class="answers">
-  <div *ngFor="let op of getOpzioni(domanda); let j = index"
-       class="risposta-btn"
-       [class.risposta-corretta]="risultati[i] && getOpzioneValue(op) === risposteCorrette[i]"
-       [class.risposta-sbagliata]="risultati[i] && risposte[i] === getOpzioneValue(op) && getOpzioneValue(op) !== risposteCorrette[i]"
-       [class.selezionata]="risposte[i] === getOpzioneValue(op)"
-       (click)="!quizTerminato && selezionaRisposta(i, getOpzioneValue(op))">
-    <span class="lettera">{{ ['A','B','C'][j] }}</span>
-    {{ getOpzioneTesto(op) }}
-    <span *ngIf="risultati[i] && getOpzioneValue(op) === risposteCorrette[i]" class="icon">✅</span>
-    <span *ngIf="risultati[i] && risposte[i] === getOpzioneValue(op) && getOpzioneValue(op) !== risposteCorrette[i]" class="icon">❌</span>
-  </div>
-</div>
+            <div *ngFor="let op of getOpzioni(domanda); let j = index"
+                 class="risposta-btn"
+                 [class.risposta-corretta]="risultati()[i] && getOpzioneValue(op) === risposteCorrette[i]"
+                 [class.risposta-sbagliata]="risultati()[i] && risposte()[i] === getOpzioneValue(op) && getOpzioneValue(op) !== risposteCorrette[i]"
+                 [class.selezionata]="risposte()[i] === getOpzioneValue(op)"
+                 (click)="!quizTerminato && selezionaRisposta(i, getOpzioneValue(op))">
+              <span class="lettera">{{ ['A','B','C'][j] }}</span>
+              {{ getOpzioneTesto(op) }}
+              <span *ngIf="risultati()[i] && getOpzioneValue(op) === risposteCorrette[i]" class="icon">✅</span>
+              <span *ngIf="risultati()[i] && risposte()[i] === getOpzioneValue(op) && getOpzioneValue(op) !== risposteCorrette[i]" class="icon">❌</span>
+            </div>
+          </div>
 
-<!-- Hint risposta corretta se sbagliata -->
-<p *ngIf="risultati[i] === 'wrong'" class="hint-corretta">
-  ✅ Corretta: <strong>{{ risposteCorrette[i] }}</strong>
-</p>
-
+          <p *ngIf="risultati()[i] === 'wrong'" class="hint-corretta">
+            ✅ Corretta: <strong>{{ risposteCorrette[i] }}</strong>
+          </p>
         </div>
       </div>
+
       <div class="controls center" *ngIf="domande().length">
         <button class="action-btn" (click)="salvaRisposte()">Salva risposte</button>
         <button class="action-btn secondary" (click)="resetQuiz()">Reset</button>
