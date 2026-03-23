@@ -1,5 +1,39 @@
+.quiz-container {
+  padding: 16px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding-bottom: 80px; // ← spazio in fondo per scorrere
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.domanda-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+
+  &.center {
+    justify-content: center;
+    margin-top: 24px;
+  }
+}
+
 .answers {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   margin-top: 12px;
 }
@@ -15,12 +49,9 @@
   cursor: pointer;
   font-size: 15px;
   transition: all 0.2s;
-  
-  &:hover {
-    background: white;
-    border-color: #999;
-    transform: translateX(4px);
-  }
+  user-select: none;
+
+  &:hover { background: white; border-color: #999; }
 }
 
 .lettera {
@@ -39,23 +70,19 @@
 .selezionata {
   border-color: #3f51b5 !important;
   background: #e8eaf6 !important;
-  
   .lettera { background: #3f51b5; color: white; }
 }
 
 .risposta-corretta {
   border-color: #4caf50 !important;
   background: #e8f5e9 !important;
-  
   .lettera { background: #4caf50; color: white; }
 }
 
 .risposta-sbagliata {
   border-color: #f44336 !important;
   background: #fff5f5 !important;
-  text-decoration: line-through;
   opacity: 0.8;
-  
   .lettera { background: #f44336; color: white; }
 }
 
@@ -69,3 +96,42 @@
   background: #e8f5e9;
   border-radius: 8px;
 }
+
+.topline {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.select-field, .input-field {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  &.small { width: 70px; }
+  &.full-width { width: 100%; }
+}
+
+.action-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #3f51b5;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  &:hover { background: #303f9f; }
+  &:disabled { background: #ccc; cursor: not-allowed; }
+  &.secondary { background: #757575; &:hover { background: #616161; } }
+  &.full-width { width: 100%; }
+}
+
+.muted { color: #888; font-size: 14px; }
+.login-section { display: flex; justify-content: center; margin-top: 60px; }
+.login-card { min-width: 320px; max-width: 400px; display: flex; flex-direction: column; gap: 12px; padding: 24px; }
+.card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }

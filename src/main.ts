@@ -3,13 +3,11 @@ import { AppComponent } from './app/app.component';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { routes } from './app/app.routes'; // ← importa le rotte corrette
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideRouter([
-      { path: '', loadComponent: () => import('./app/quiz/quiz.component').then(m => m.QuizComponent) },
-      { path: '**', loadComponent: () => import('./app/quiz/quiz.component').then(m => m.QuizComponent) }
-    ]),
+    provideRouter(routes), // ← usa routes invece delle rotte inline
     provideHttpClient(),
     provideAnimationsAsync()
   ]

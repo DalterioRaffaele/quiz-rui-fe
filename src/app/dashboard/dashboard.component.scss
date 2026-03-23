@@ -186,3 +186,12 @@
     grid-template-columns: 1fr;
   }
 }
+
+.action-btn.danger {
+  background: #f44336;
+  color: white !important;
+  border: none;
+
+  &:hover { background: #d32f2f; }
+}
+

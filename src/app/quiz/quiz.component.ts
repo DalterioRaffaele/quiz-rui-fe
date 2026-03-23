@@ -41,6 +41,7 @@ export class QuizComponent implements OnInit {
   risposteCompletate = computed(() => this.risposte().filter(r => r !== '').length);
 
   progressi: Record<string, any> = {};
+  private opzioniMescolate = new Map<number, any[]>();
 
   constructor(
     public authService: AuthService,
@@ -91,6 +92,7 @@ export class QuizComponent implements OnInit {
     this.apiService.getDomande(this.selectedSettore, this.selectedMateria, this.numDomande).subscribe({
       next: domande => {
         this.domande.set(domande);
+        this.opzioniMescolate.clear();
         this.risposte.set(new Array(domande.length).fill(''));
         this.risultati.set(new Array(domande.length).fill(''));
         this.quizTerminato = false;
@@ -106,9 +108,19 @@ export class QuizComponent implements OnInit {
     });
   }
 
-  getOpzioni(domanda: any): any[] {
-    return domanda.risposte || domanda.opzioni || [];
+getOpzioni(domanda: any, index: number): any[] {
+  if (!this.opzioniMescolate.has(index)) {
+    const opzioni = [...(domanda.risposte || domanda.opzioni || [])];
+    // Fisher-Yates shuffle
+    for (let i = opzioni.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [opzioni[i], opzioni[j]] = [opzioni[j], opzioni[i]];
+    }
+    this.opzioniMescolate.set(index, opzioni);
   }
+  return this.opzioniMescolate.get(index)!;
+}
+
 
   getOpzioneTesto(op: any): string {
     return typeof op === 'string' ? op : (op.testo || op.risposta || '');
