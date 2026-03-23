@@ -1,0 +1,71 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Dashboard</h1>
+      <p>Riepilogo attività e progressi</p>
+    </div>
+    <div class="header-right">
+      <span class="user-greeting">Ciao, {{authService.currentUser?.username}}!</span>
+      <span *ngIf="authService.isSupervisor" class="supervisor-badge">⭐ Supervisor</span>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <mat-grid-list cols="4" rowHeight="140px" gutterSize="24px" class="stats-grid">
+    <mat-grid-tile>
+      <mat-card class="stat-card total">
+        <div class="stat-icon">📊</div>
+        <div class="stat-value">{{stats.total}}</div>
+        <div class="stat-label">Domande totali</div>
+      </mat-card>
+    </mat-grid-tile>
+    
+    <mat-grid-tile>
+      <mat-card class="stat-card success">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value">{{stats.corrette}}</div>
+        <div class="stat-label">Corrette</div>
+      </mat-card>
+    </mat-grid-tile>
+    
+    <mat-grid-tile>
+      <mat-card class="stat-card warning">
+        <div class="stat-icon">❌</div>
+        <div class="stat-value">{{stats.errori}}</div>
+        <div class="stat-label">Errori</div>
+      </mat-card>
+    </mat-grid-tile>
+    
+    <mat-grid-tile>
+      <mat-card class="stat-card primary">
+        <div class="stat-icon">📈</div>
+        <div class="stat-value">{{stats.completion}}%</div>
+        <div class="stat-label">Completamento</div>
+        <mat-progress-bar [value]="stats.completion" mode="determinate"></mat-progress-bar>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
+
+  <!-- Quick Actions -->
+  <div class="actions-section">
+    <h3>Azioni rapide</h3>
+    <div class="actions-grid">
+      <a routerLink="/quiz" class="action-card primary">
+        <mat-icon>quiz</mat-icon>
+        <h4>Allenati</h4>
+        <p>Nuovo quiz</p>
+      </a>
+      <a routerLink="/errors" class="action-card warning">
+        <mat-icon>error</mat-icon>
+        <h4>Ripassa errori</h4>
+        <p>{{stats.errori}} domande</p>
+      </a>
+      <button *ngIf="authService.isSupervisor" class="action-card secondary" (click)="loadStats()">
+        <mat-icon>refresh</mat-icon>
+        <h4>Aggiorna</h4>
+        <p>Statistiche</p>
+      </button>
+    </div>
+  </div>
+</div>

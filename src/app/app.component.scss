@@ -1,0 +1,6 @@
+.app-container { height: calc(100vh - 64px); }
+.spacer { flex: 1 1 auto; }
+.logo { font-weight: 500; }
+.username { margin: 0 16px; color: rgba(255,255,255,0.87); }
+.main-content { padding: 24px; min-height: calc(100vh - 128px); background: #f7f7f9; }
+.active { background: rgba(255,255,255,0.12) !important; }
