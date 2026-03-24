@@ -38,6 +38,11 @@
           <mat-icon matListItemIcon>bar_chart</mat-icon>
           <span matListItemTitle>Progressi</span>
         </a>
+        <a mat-list-item routerLink="/utenti" routerLinkActive="active-link"
+         *ngIf="authService.isSupervisor">
+         <mat-icon matListItemIcon>manage_accounts</mat-icon>
+         <span matListItemTitle>Utenti</span>
+         </a>
         <mat-divider></mat-divider>
         <!-- ↓ classe corretta: logout-item -->
         <div class="logout-item" (click)="authService.logout()">

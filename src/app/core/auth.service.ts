@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { Router } from '@angular/router';
 
 export interface User {
   username: string;
@@ -8,6 +9,8 @@ export interface User {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private user = signal<User | null>(null);
+
+  constructor(private router: Router) {}
 
   init(): void {
     const token = localStorage.getItem('quiz_token');
@@ -28,6 +31,7 @@ export class AuthService {
     this.user.set(null);
     localStorage.removeItem('quiz_token');
     localStorage.removeItem('quiz_user');
+    this.router.navigate(['/quiz']);
   }
 
   get currentUser() { return this.user(); }
