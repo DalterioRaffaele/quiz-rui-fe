@@ -33,6 +33,9 @@ export class UtentiComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    console.log('isSupervisor:', this.authService.isSupervisor);
+  console.log('currentUser:', this.authService.currentUser);
+  console.log('isLoggedIn:', this.authService.isLoggedIn);
     if (!this.authService.isSupervisor) {
       this.router.navigate(['/quiz']);
       return;

@@ -1,0 +1,90 @@
+<div class="dashboard-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <h1>📊 I tuoi Progressi</h1>
+      <p>Monitora le tue performance e identifica le aree da migliorare</p>
+    </div>
+    <button mat-raised-button class="new-quiz-btn" routerLink="/quiz">
+      🚀 Nuovo Quiz
+    </button>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stats-grid">
+    <mat-card class="stat-card">
+      <div class="stat-icon" style="background: #ede9fe; color: #7c3aed">📝</div>
+      <div class="stat-info">
+        <div class="stat-value" style="color:#7c3aed">{{ stats.total }}</div>
+        <div class="stat-label">Quiz Completati</div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="stat-icon" style="background: #ecfdf5; color: #10b981">✅</div>
+      <div class="stat-info">
+        <div class="stat-value" style="color:#10b981">{{ stats.correct }}%</div>
+        <div class="stat-label">Risposte Corrette</div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="stat-icon" style="background: #fef2f2; color: #ef4444">❌</div>
+      <div class="stat-info">
+        <div class="stat-value" style="color:#ef4444">{{ stats.errors }}</div>
+        <div class="stat-label">Da Rivedere</div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="stat-icon" style="background: #fffbeb; color: #f59e0b">🏆</div>
+      <div class="stat-info">
+        <div class="stat-value" style="color:#f59e0b">{{ stats.streak }}gg</div>
+        <div class="stat-label">Streak Attuale</div>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- PROGRESS BAR GLOBALE -->
+  <mat-card class="progress-card">
+    <mat-card-header>
+      <mat-card-title>🎯 Preparazione Complessiva</mat-card-title>
+      <mat-card-subtitle>Basata sulle ultime 30 sessioni</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="global-progress">
+        <div class="progress-track">
+          <div class="progress-fill" [style.width.%]="stats.globalProgress"></div>
+        </div>
+        <span class="progress-pct">{{ stats.globalProgress }}%</span>
+      </div>
+      <div class="progress-milestones">
+        <span class="milestone" [class.reached]="stats.globalProgress >= 25">25% — Principiante</span>
+        <span class="milestone" [class.reached]="stats.globalProgress >= 50">50% — Intermedio</span>
+        <span class="milestone" [class.reached]="stats.globalProgress >= 75">75% — Avanzato</span>
+        <span class="milestone" [class.reached]="stats.globalProgress >= 90">90% — Pronto all'esame 🎓</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ULTIMI QUIZ -->
+  <mat-card class="history-card">
+    <mat-card-header>
+      <mat-card-title>📋 Ultime Sessioni</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="history-item" *ngFor="let session of recentSessions">
+        <div class="session-icon">{{ session.score >= 70 ? '✅' : '⚠️' }}</div>
+        <div class="session-info">
+          <strong>{{ session.date }}</strong>
+          <span>{{ session.total }} domande — {{ session.category }}</span>
+        </div>
+        <div class="session-score" [style.color]="session.score >= 70 ? '#10b981' : '#f59e0b'">
+          {{ session.score }}%
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+</div>

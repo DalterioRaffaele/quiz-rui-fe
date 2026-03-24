@@ -1,13 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { RouterModule } from '@angular/router';
 import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-progressi',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './progressi.component.html'
+  imports: [CommonModule, MatButtonModule, RouterModule],
+  templateUrl: './progressi.component.html',
+  styleUrls: ['./progressi.component.scss']
 })
 export class ProgressiComponent implements OnInit {
   progressi: Record<string, any> = {};
@@ -29,6 +32,27 @@ export class ProgressiComponent implements OnInit {
       next: () => { this.progressi = {}; alert('Progressi cancellati!'); },
       error: () => alert('Errore reset')
     });
+  }
+
+  getAccuracyColor(): string {
+    const v = +this.statsAccuracy;
+    if (v >= 75) return '#10b981';
+    if (v >= 50) return '#f59e0b';
+    return '#ef4444';
+  }
+
+  getPreparazione(): number {
+    if (this.statsViste === 0) return 0;
+    const accuracy = +this.statsAccuracy;
+    const viste = Math.min(this.statsViste / 10, 50); // max 50 punti per domande viste
+    return Math.min(Math.round((accuracy * 0.5) + viste), 100);
+  }
+
+  get topErrori() {
+    return Object.values(this.progressi)
+      .filter((p: any) => p.wrong > 0)
+      .sort((a: any, b: any) => b.wrong - a.wrong)
+      .slice(0, 10);
   }
 
   get statsViste() { return Object.values(this.progressi).filter((p: any) => p.seen).length; }

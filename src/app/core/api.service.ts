@@ -61,4 +61,10 @@ export class ApiService {
   resetProgressi(): Observable<{ ok: boolean }> {
     return this.http.delete<any>(`${this.baseUrl}/progressi`, { headers: this.getHeaders() });
   }
+
+  getDomandeByNumeri(numeri: number[]): Observable<any[]> {
+  return this.http.post<any[]>(`${this.baseUrl}/domande/by-numeri`, { numeri }, { headers: this.getHeaders() });
+  }
+
+
 }

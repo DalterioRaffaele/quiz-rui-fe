@@ -1,55 +1,80 @@
 <div class="app-wrapper">
 
   <!-- TOOLBAR -->
-  <mat-toolbar color="primary" class="toolbar">
-    <button mat-icon-button (click)="toggleSidenav()" *ngIf="authService.isLoggedIn">
-      <mat-icon>menu</mat-icon>
+  <mat-toolbar class="toolbar" *ngIf="authService.isLoggedIn">
+    <button mat-icon-button (click)="toggleSidenav()" class="menu-btn">
+      <span class="material-icons">{{ sidenavOpen ? 'menu_open' : 'menu' }}</span>
     </button>
-    <span class="brand">🎓 Quiz RUI Pro</span>
-    <span style="flex: 1 1 auto;"></span>
-    <ng-container *ngIf="authService.isLoggedIn">
-      <span class="username">
-        <mat-icon>person</mat-icon> {{ authService.currentUser?.username }}
-      </span>
-      <button mat-icon-button (click)="authService.logout()" matTooltip="Esci">
-        <mat-icon>logout</mat-icon>
+    <span class="brand">
+      <span class="brand-icon">🎓</span>
+      <span class="brand-text">Quiz RUI <span class="brand-pro">Pro</span></span>
+    </span>
+    <span class="spacer"></span>
+    <div class="toolbar-right">
+      <div class="user-chip">
+        <div class="user-avatar">{{ authService.username.charAt(0).toUpperCase() }}</div>
+        <span class="user-name">{{ authService.username }}</span>
+        <span class="user-role" [class.supervisor]="authService.isSupervisor">
+          {{ authService.isSupervisor ? 'Supervisor' : 'Utente' }}
+        </span>
+      </div>
+      <button mat-icon-button (click)="authService.logout()" matTooltip="Esci" class="logout-btn">
+        <span class="material-icons">logout</span>
       </button>
-    </ng-container>
+    </div>
   </mat-toolbar>
 
   <mat-sidenav-container class="sidenav-container">
 
     <!-- SIDEBAR -->
-    <mat-sidenav [opened]="sidenavOpen && authService.isLoggedIn" mode="side" class="sidenav">
-      <mat-nav-list>
-        <a mat-list-item routerLink="/quiz" routerLinkActive="active-link">
-          <mat-icon matListItemIcon>quiz</mat-icon>
-          <span matListItemTitle>Quiz</span>
+    <mat-sidenav
+      [opened]="sidenavOpen && authService.isLoggedIn"
+      [mode]="isMobile ? 'over' : 'side'"
+      class="sidenav"
+      (backdropClick)="sidenavOpen = false">
+
+      <div class="sidenav-header">
+        <div class="sidenav-logo">🎓</div>
+        <div>
+          <div class="sidenav-title">Quiz RUI Pro</div>
+          <div class="sidenav-subtitle">Piattaforma di Studio</div>
+        </div>
+      </div>
+
+      <div class="sidenav-section-label">MENU</div>
+
+      <div class="nav-links">
+        <a class="nav-item" routerLink="/quiz" routerLinkActive="nav-active"
+          (click)="isMobile && (sidenavOpen = false)">
+          <span class="material-icons">quiz</span>
+          <span>Quiz</span>
         </a>
-        <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link">
-          <mat-icon matListItemIcon>dashboard</mat-icon>
-          <span matListItemTitle>Dashboard</span>
+        <a class="nav-item" routerLink="/errors" routerLinkActive="nav-active"
+          (click)="isMobile && (sidenavOpen = false)">
+          <span class="material-icons">error_outline</span>
+          <span>Errori</span>
         </a>
-        <a mat-list-item routerLink="/errors" routerLinkActive="active-link">
-          <mat-icon matListItemIcon>error_outline</mat-icon>
-          <span matListItemTitle>Errori</span>
+        <a class="nav-item" routerLink="/progressi" routerLinkActive="nav-active"
+          (click)="isMobile && (sidenavOpen = false)">
+          <span class="material-icons">bar_chart</span>
+          <span>Progressi</span>
         </a>
-        <a mat-list-item routerLink="/progressi" routerLinkActive="active-link">
-          <mat-icon matListItemIcon>bar_chart</mat-icon>
-          <span matListItemTitle>Progressi</span>
+        <a class="nav-item" routerLink="/utenti" routerLinkActive="nav-active"
+          *ngIf="authService.isSupervisor"
+          (click)="isMobile && (sidenavOpen = false)">
+          <span class="material-icons">manage_accounts</span>
+          <span>Utenti</span>
         </a>
-        <a mat-list-item routerLink="/utenti" routerLinkActive="active-link"
-         *ngIf="authService.isSupervisor">
-         <mat-icon matListItemIcon>manage_accounts</mat-icon>
-         <span matListItemTitle>Utenti</span>
-         </a>
+      </div>
+
+      <div class="sidenav-footer">
         <mat-divider></mat-divider>
-        <!-- ↓ classe corretta: logout-item -->
         <div class="logout-item" (click)="authService.logout()">
-          <mat-icon>logout</mat-icon>
+          <span class="material-icons">logout</span>
           <span>Esci</span>
         </div>
-      </mat-nav-list>
+      </div>
+
     </mat-sidenav>
 
     <!-- CONTENT -->
@@ -58,4 +83,10 @@
     </mat-sidenav-content>
 
   </mat-sidenav-container>
+
+</div>
+
+<div class="mobile-overlay"
+  *ngIf="isMobile && sidenavOpen && authService.isLoggedIn"
+  (click)="sidenavOpen = false">
 </div>

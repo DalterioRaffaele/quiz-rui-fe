@@ -1,71 +1,180 @@
-<div class="quiz-container">
-
-  <!-- LOGIN -->
-  <div *ngIf="!authService.isLoggedIn" class="login-section">
-    <div class="card login-card">
-  <h1>Quiz RUI Pro</h1>
-  <p class="muted">Accedi per iniziare l'allenamento</p>
-  <input [(ngModel)]="loginUsername" class="input-field full-width"
-         placeholder="Username" />
-  <input [(ngModel)]="loginPassword" class="input-field full-width"
-         type="password" placeholder="Password"
-         (keyup.enter)="doLogin()" />
-  <p *ngIf="loginError" style="color:#f44336; font-size:13px; text-align:center;">
-    {{ loginError }}
-  </p>
-  <button class="action-btn full-width" (click)="doLogin()"
-          [disabled]="!loginUsername.trim() || !loginPassword.trim() || loginLoading">
-    {{ loginLoading ? 'Accesso in corso...' : 'ACCEDI' }}
-  </button>
+<!-- HERO (non loggato) -->
+<div class="hero-section" *ngIf="!authService.isLoggedIn && !showLogin">
+  <div class="hero-content">
+    <div class="hero-badge">🎓 Piattaforma di Studio Professionale</div>
+    <h1>Preparati all'esame <span class="highlight">RUI</span> con sicurezza</h1>
+    <p>Quiz interattivi, statistiche in tempo reale e monitoraggio dei progressi.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><strong>1.200+</strong><span>Domande</span></div>
+      <div class="hero-stat"><strong>98%</strong><span>Soddisfazione</span></div>
+      <div class="hero-stat"><strong>5 min</strong><span>Setup</span></div>
+    </div>
+    <button mat-raised-button class="cta-btn" (click)="showLogin = true">
+      Accedi alla Piattaforma →
+    </button>
+  </div>
+  <div class="hero-cards">
+    <div class="floating-card">📝 Quiz personalizzati per argomento</div>
+    <div class="floating-card">📊 Statistiche e progressi in tempo reale</div>
+    <div class="floating-card">❌ Revisione errori intelligente</div>
+    <div class="floating-card">🏆 Preparazione completa all'esame RUI</div>
+  </div>
 </div>
 
+<!-- LOGIN -->
+<div class="login-wrapper" *ngIf="!authService.isLoggedIn && showLogin">
+  <mat-card class="login-card">
+    <div class="login-header">
+      <span class="login-icon">🔐</span>
+      <h2>Accedi alla piattaforma</h2>
+      <p>Inserisci le tue credenziali per continuare</p>
+    </div>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Username</mat-label>
+      <input matInput [(ngModel)]="username" placeholder="Il tuo username" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Password</mat-label>
+      <input matInput [type]="hidePassword ? 'password' : 'text'" [(ngModel)]="password" />
+      <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword">
+        <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    </mat-form-field>
+    <div *ngIf="errorMsg" class="error-msg">
+      <mat-icon>error_outline</mat-icon> {{ errorMsg }}
+    </div>
+    <button mat-raised-button class="login-btn" (click)="login()" [disabled]="loading">
+      <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+      <span *ngIf="!loading">Accedi →</span>
+    </button>
+    <div class="back-link" (click)="showLogin = false">← Torna alla home</div>
+  </mat-card>
+</div>
+
+<!-- QUIZ (loggato) -->
+<div class="quiz-page" *ngIf="authService.isLoggedIn">
+
+  <!-- Welcome Banner -->
+  <div class="welcome-banner">
+    <div class="welcome-text">
+      <h2>👋 Bentornato, <strong>{{ authService.username }}</strong>!</h2>
+      <p>Pronto per il quiz di oggi? Continua il tuo percorso verso l'esame RUI.</p>
+    </div>
+    <button mat-stroked-button class="banner-btn" routerLink="/progressi">
+      📊 Vedi Progressi
+    </button>
   </div>
 
-  <!-- QUIZ -->
-  <div *ngIf="authService.isLoggedIn">
-    <h2>Allenamento</h2>
-    <div class="controls">
-      <select [(ngModel)]="selectedSettore" class="select-field" (change)="caricaMaterie()">
-        <option value="">Settore</option>
-        <option *ngFor="let s of settori()" [value]="s">{{ s }}</option>
-      </select>
-      <select [(ngModel)]="selectedMateria" class="select-field" [disabled]="!materie().length">
-        <option value="">Materia</option>
-        <option *ngFor="let m of materie()" [value]="m">{{ m }}</option>
-      </select>
-      <input type="number" [(ngModel)]="numDomande" min="1" max="100" class="input-field small" />
-      <button class="action-btn" (click)="caricaDomande()" [disabled]="!selectedMateria">Inizia quiz</button>
-    </div>
+  <!-- Configurazione quiz (solo se non started) -->
+  <ng-container *ngIf="domande().length === 0">
 
-    <div class="grid" *ngIf="domande().length">
-      <div *ngFor="let domanda of domande(); trackBy: trackByIndex; let i = index" class="card domanda-card">
-        <div class="topline">
-          <strong>{{ i + 1 }}/{{ domandeCount() }}</strong>
-          <strong>{{ risposteCompletate() }}/{{ domandeCount() }}</strong>
-        </div>
-        <p><strong>{{ domanda.testo || domanda.domanda }}</strong></p>
-        <div class="answers">
-          <div *ngFor="let op of getOpzioni(domanda, i); let j = index"
-               class="risposta-btn"
-               [class.risposta-corretta]="risultati()[i] && getOpzioneValue(op) === risposteCorrette[i]"
-               [class.risposta-sbagliata]="risultati()[i] && risposte()[i] === getOpzioneValue(op) && getOpzioneValue(op) !== risposteCorrette[i]"
-               [class.selezionata]="risposte()[i] === getOpzioneValue(op)"
-               (click)="!quizTerminato && selezionaRisposta(i, getOpzioneValue(op))">
-            <span class="lettera">{{ ['A','B','C'][j] }}</span>
-            {{ getOpzioneTesto(op) }}
-            <span *ngIf="risultati()[i] && getOpzioneValue(op) === risposteCorrette[i]" class="icon">✅</span>
-            <span *ngIf="risultati()[i] && risposte()[i] === getOpzioneValue(op) && getOpzioneValue(op) !== risposteCorrette[i]" class="icon">❌</span>
-          </div>
-        </div>
-        <p *ngIf="risultati()[i] === 'wrong'" class="hint-corretta">
-          ✅ Corretta: <strong>{{ risposteCorrette[i] }}</strong>
-        </p>
+    <div class="section-title">🎯 Scegli la modalità</div>
+    <div class="mode-cards">
+      <div class="mode-card" [class.active]="mode === 'random'" (click)="mode = 'random'">
+        <span class="mode-icon">🔀</span>
+        <strong>Quiz Casuale</strong>
+        <p>Domande miste da tutti gli argomenti</p>
+      </div>
+      <div class="mode-card" [class.active]="mode === 'errors'" (click)="mode = 'errors'">
+        <span class="mode-icon">❌</span>
+        <strong>Ripassa Errori</strong>
+        <p>Solo le domande sbagliate in precedenza</p>
+      </div>
+      <div class="mode-card" [class.active]="mode === 'topic'" (click)="mode = 'topic'">
+        <span class="mode-icon">📚</span>
+        <strong>Per Argomento</strong>
+        <p>Concentrati su un tema specifico</p>
       </div>
     </div>
 
-    <div class="controls center" *ngIf="domande().length">
-      <button class="action-btn" (click)="salvaRisposte()">Salva risposte</button>
-      <button class="action-btn secondary" (click)="resetQuiz()">Reset</button>
+    <!-- Selettori per modalità topic -->
+    <div class="topic-selectors" *ngIf="mode === 'topic'">
+      <mat-form-field appearance="outline" class="selector-field">
+        <mat-label>Settore</mat-label>
+        <mat-select [(ngModel)]="selectedSettore" (ngModelChange)="caricaMaterie()">
+          <mat-option *ngFor="let s of settori()" [value]="s">{{ s }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="selector-field">
+        <mat-label>Materia</mat-label>
+        <mat-select [(ngModel)]="selectedMateria">
+          <mat-option *ngFor="let m of materie()" [value]="m">{{ m }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="selector-field selector-small">
+        <mat-label>N° domande</mat-label>
+        <mat-select [(ngModel)]="numDomande">
+          <mat-option [value]="10">10</mat-option>
+          <mat-option [value]="20">20</mat-option>
+          <mat-option [value]="30">30</mat-option>
+          <mat-option [value]="50">50</mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
+
+    <button mat-raised-button class="start-btn" (click)="avviaQuiz()">
+      🚀 Inizia Quiz
+    </button>
+
+  </ng-container>
+
+  <!-- Lista domande -->
+  <ng-container *ngIf="domande().length > 0 && !quizTerminato">
+
+    <div class="quiz-header">
+      <span class="quiz-counter">📝 {{ domandeCount() }} domande — {{ risposteCompletate() }} risposte date</span>
+      <button mat-stroked-button class="reset-btn" (click)="resetQuiz()">🔄 Ricomincia</button>
+    </div>
+
+    <div class="question-card" *ngFor="let d of domande(); let i = index; trackBy: trackByIndex">
+
+      <div class="question-header">
+        <span class="q-number">Domanda {{ i + 1 }}</span>
+        <span class="q-category">{{ d.materia || d.settore || 'Generale' }}</span>
+      </div>
+
+      <div class="question-text">{{ d.testo || d.domanda }}</div>
+
+      <div class="options">
+        <button
+          *ngFor="let op of getOpzioni(d, i)"
+          class="option-btn"
+          [class.selected]="risposte()[i] === getOpzioneValue(op) && risultati()[i] === ''"
+          [class.correct]="risposte()[i] !== '' && isOpzioneCorretta(op)"
+          [class.wrong]="risposte()[i] === getOpzioneValue(op) && risultati()[i] === 'wrong'"
+          [disabled]="risposte()[i] !== ''"
+          (click)="selezionaRisposta(i, getOpzioneValue(op))">
+          {{ getOpzioneTesto(op) }}
+        </button>
+      </div>
+
+      <!-- Feedback -->
+      <div class="answer-feedback correct-feedback" *ngIf="risultati()[i] === 'correct'">
+        ✅ <strong>Corretto!</strong>
+      </div>
+      <div class="answer-feedback wrong-feedback" *ngIf="risultati()[i] === 'wrong'">
+        ❌ <strong>Sbagliato.</strong> Risposta corretta: <em>{{ risposteCorrette[i] }}</em>
+      </div>
+
+    </div>
+
+    <!-- Salva -->
+    <div class="quiz-footer">
+      <span class="punteggio-preview">{{ punteggio }} / {{ domandeCount() }} corrette</span>
+      <button mat-raised-button class="save-btn" (click)="salvaRisposte()">
+        💾 Salva Risultati
+      </button>
+    </div>
+
+  </ng-container>
+
+  <!-- Risultato finale -->
+  <div class="risultato-finale" *ngIf="quizTerminato">
+    <div class="risultato-icon">🏆</div>
+    <h2>Quiz Completato!</h2>
+    <div class="risultato-score">{{ punteggio }} / {{ domandeCount() }}</div>
+    <p>{{ punteggio >= domandeCount() * 0.7 ? 'Ottimo risultato! Continua così 💪' : 'Continua a studiare, ci sei quasi! 📚' }}</p>
+    <button mat-raised-button class="start-btn" (click)="resetQuiz()">🔄 Nuovo Quiz</button>
   </div>
+
 </div>

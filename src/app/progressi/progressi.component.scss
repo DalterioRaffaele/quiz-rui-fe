@@ -1,0 +1,145 @@
+.progressi-page { padding: 32px; max-width: 1000px; margin: 0 auto; }
+
+.page-header {
+  display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px;
+  h1 { font-size: 28px; font-weight: 800; color: #1f2937; margin: 0 0 6px; }
+  p { color: #6b7280; font-size: 14px; margin: 0; }
+}
+
+.danger-btn {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  color: white !important; font-weight: 700 !important;
+  border-radius: 12px !important; padding: 10px 24px !important;
+}
+
+// STAT CARDS
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px; margin-bottom: 24px;
+}
+
+.stat-card {
+  background: white; border-radius: 20px;
+  padding: 20px; display: flex;
+  align-items: center; gap: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  border: 1px solid #f3f0ff;
+  transition: transform 0.2s;
+  &:hover { transform: translateY(-4px); }
+
+  &.stat-card-wide {
+    grid-column: span 4;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .stat-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    display: flex; align-items: center;
+    justify-content: center; font-size: 24px; flex-shrink: 0;
+  }
+
+  .stat-value { font-size: 28px; font-weight: 800; line-height: 1; }
+  .stat-label { font-size: 12px; color: #6b7280; margin-top: 4px; }
+}
+
+.accuracy-bar-wrap {
+  flex: 1; height: 10px; background: #e5e7eb;
+  border-radius: 5px; overflow: hidden;
+  .accuracy-bar-fill {
+    height: 100%; border-radius: 5px;
+    transition: width 0.6s ease;
+  }
+}
+
+// PROGRESS CARD
+.progress-card {
+  background: white; border-radius: 20px;
+  padding: 24px 28px; margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  border: 1px solid #f3f0ff;
+
+  .progress-card-header {
+    display: flex; justify-content: space-between;
+    font-size: 16px; font-weight: 700; color: #1f2937;
+    margin-bottom: 16px;
+    .progress-pct { color: #7c3aed; font-size: 20px; }
+  }
+}
+
+.progress-track {
+  height: 10px; background: #e5e7eb; border-radius: 5px;
+  overflow: hidden; margin-bottom: 16px;
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #7c3aed, #a78bfa);
+    border-radius: 5px; transition: width 0.6s ease;
+  }
+}
+
+.milestones {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  .milestone {
+    font-size: 12px; color: #9ca3af;
+    padding: 4px 12px; border-radius: 20px;
+    border: 1px solid #e5e7eb;
+    &.reached {
+      color: #7c3aed; border-color: #c4b5fd;
+      background: #f5f3ff; font-weight: 600;
+    }
+  }
+}
+
+// ERRORI CARD
+.errori-card {
+  background: white; border-radius: 20px;
+  padding: 24px 28px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  border: 1px solid #fef2f2;
+
+  .errori-header {
+    display: flex; justify-content: space-between;
+    font-size: 16px; font-weight: 700; color: #1f2937;
+    margin-bottom: 16px;
+    .errori-count { color: #ef4444; font-size: 14px; font-weight: 600; }
+  }
+}
+
+.errore-item {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; gap: 16px;
+  padding: 14px 0; border-bottom: 1px solid #f9fafb;
+  &:last-child { border-bottom: none; }
+}
+
+.errore-badges {
+  display: flex; gap: 8px; margin-bottom: 6px;
+  .badge {
+    border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600;
+    &.badge-num { background: #ede9fe; color: #7c3aed; }
+    &.badge-materia { background: #e0f2fe; color: #0369a1; }
+  }
+}
+
+.errore-domanda {
+  font-size: 13px; color: #374151; margin: 0; line-height: 1.5;
+}
+
+.errore-scores {
+  display: flex; flex-direction: column; gap: 4px;
+  align-items: flex-end; white-space: nowrap;
+  .score-wrong { color: #ef4444; font-size: 13px; font-weight: 600; }
+  .score-correct { color: #10b981; font-size: 13px; font-weight: 600; }
+}
+
+// EMPTY STATE
+.empty-state {
+  text-align: center; padding: 80px 20px;
+  background: white; border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  .empty-icon { font-size: 72px; display: block; margin-bottom: 16px; }
+  h3 { font-size: 22px; font-weight: 700; color: #1f2937; margin: 0 0 8px; }
+  p { color: #6b7280; margin: 0; }
+}

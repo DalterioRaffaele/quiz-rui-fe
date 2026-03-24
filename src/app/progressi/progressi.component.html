@@ -1,28 +1,111 @@
-<div class="progressi-container">
-  <h2>📈 Progressi</h2>
+<div class="progressi-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <h1>📈 I tuoi Progressi</h1>
+      <p>Monitora le tue performance e identifica le aree da migliorare</p>
+    </div>
+    <button mat-raised-button class="reset-btn danger-btn"
+      *ngIf="authService.isSupervisor" (click)="resetProgressi()">
+      🗑 Reset Progressi
+    </button>
+  </div>
+
+  <!-- STAT CARDS -->
   <div class="stats-grid">
-    <div class="stat card">
-      <div class="label">Domande viste</div>
-      <div class="value">{{ statsViste }}</div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#ede9fe; color:#7c3aed">👁</div>
+      <div class="stat-info">
+        <div class="stat-value" style="color:#7c3aed">{{ statsViste }}</div>
+        <div class="stat-label">Domande Viste</div>
+      </div>
     </div>
-    <div class="stat card">
-      <div class="label">Con errori</div>
-      <div class="value danger">{{ erroriCount }}</div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#ecfdf5; color:#10b981">✅</div>
+      <div class="stat-info">
+        <div class="stat-value" style="color:#10b981">{{ statsCorrette }}</div>
+        <div class="stat-label">Corrette Totali</div>
+      </div>
     </div>
-    <div class="stat card">
-      <div class="label">Corrette totali</div>
-      <div class="value success">{{ statsCorrette }}</div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fef2f2; color:#ef4444">❌</div>
+      <div class="stat-info">
+        <div class="stat-value" style="color:#ef4444">{{ statsErrori }}</div>
+        <div class="stat-label">Sbagliate Totali</div>
+      </div>
     </div>
-    <div class="stat card">
-      <div class="label">Sbagliate totali</div>
-      <div class="value danger">{{ statsErrori }}</div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fef2f2; color:#f59e0b">⚠️</div>
+      <div class="stat-info">
+        <div class="stat-value" style="color:#f59e0b">{{ erroriCount }}</div>
+        <div class="stat-label">Con Errori</div>
+      </div>
     </div>
-    <div class="stat card">
-      <div class="label">Precisione</div>
-      <div class="value">{{ statsAccuracy }}%</div>
+
+    <div class="stat-card stat-card-wide">
+      <div class="stat-icon" style="background:#fffbeb; color:#7c3aed">🎯</div>
+      <div class="stat-info">
+        <div class="stat-value" style="color:#7c3aed">{{ statsAccuracy }}%</div>
+        <div class="stat-label">Precisione Globale</div>
+      </div>
+      <div class="accuracy-bar-wrap">
+        <div class="accuracy-bar-fill"
+          [style.width.%]="+statsAccuracy"
+          [style.background]="getAccuracyColor()">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PREPARAZIONE GLOBALE -->
+  <div class="progress-card">
+    <div class="progress-card-header">
+      <span>🏆 Preparazione Complessiva</span>
+      <span class="progress-pct">{{ getPreparazione() }}%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" [style.width.%]="getPreparazione()"></div>
+    </div>
+    <div class="milestones">
+      <span class="milestone" [class.reached]="getPreparazione() >= 25">25% Principiante</span>
+      <span class="milestone" [class.reached]="getPreparazione() >= 50">50% Intermedio</span>
+      <span class="milestone" [class.reached]="getPreparazione() >= 75">75% Avanzato</span>
+      <span class="milestone" [class.reached]="getPreparazione() >= 90">90% Pronto 🎓</span>
     </div>
   </div>
-  <div style="margin-top: 24px;" *ngIf="authService.isSupervisor">
-    <button class="action-btn danger" (click)="resetProgressi()">🗑 Reset progressi</button>
+
+  <!-- TOP ERRORI -->
+  <div class="errori-card" *ngIf="topErrori.length > 0">
+    <div class="errori-header">
+      <span>❌ Domande più difficili</span>
+      <span class="errori-count">{{ erroriCount }} da rivedere</span>
+    </div>
+    <div class="errore-item" *ngFor="let item of topErrori">
+      <div class="errore-info">
+        <div class="errore-badges">
+          <span class="badge badge-num">#{{ item.numero }}</span>
+          <span class="badge badge-materia">{{ item.materia }}</span>
+        </div>
+        <p class="errore-domanda">{{ item.domanda }}</p>
+      </div>
+      <div class="errore-scores">
+        <span class="score-wrong">❌ {{ item.wrong }}</span>
+        <span class="score-correct">✅ {{ item.correct }}</span>
+      </div>
+    </div>
   </div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-state" *ngIf="statsViste === 0">
+    <span class="empty-icon">🚀</span>
+    <h3>Nessun progresso ancora</h3>
+    <p>Completa il tuo primo quiz per vedere le statistiche qui!</p>
+  </div>
+
 </div>
