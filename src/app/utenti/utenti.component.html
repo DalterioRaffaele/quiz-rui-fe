@@ -1,0 +1,60 @@
+<div class="utenti-container">
+  <h2>👥 Gestione Utenti</h2>
+
+  <!-- CREA UTENTE -->
+  <div class="card form-card">
+    <h3>Crea nuovo utente</h3>
+    <div class="form-row">
+      <input [(ngModel)]="newUsername" class="input-field" placeholder="Username" />
+      <input [(ngModel)]="newPassword" class="input-field" type="password" placeholder="Password" />
+      <select [(ngModel)]="newRole" class="select-field">
+        <option value="limited">Limited</option>
+        <option value="supervisor">Supervisor</option>
+      </select>
+      <button class="action-btn" (click)="creaUtente()" [disabled]="loading">
+        {{ loading ? 'Creazione...' : '+ Crea' }}
+      </button>
+    </div>
+    <p *ngIf="errore" class="msg error">{{ errore }}</p>
+    <p *ngIf="successo" class="msg success">{{ successo }}</p>
+  </div>
+
+  <!-- LISTA UTENTI -->
+  <div class="card" style="margin-top: 24px;">
+    <h3>Utenti registrati ({{ utenti.length }})</h3>
+    <p *ngIf="utenti.length === 0" class="muted">Nessun utente trovato.</p>
+    <div class="utenti-list">
+      <div *ngFor="let u of utenti" class="utente-row">
+        <span class="u-icon">👤</span>
+        <span class="u-name">{{ u.username }}</span>
+        <span class="badge" [class.supervisor]="u.role === 'supervisor'">{{ u.role }}</span>
+        <span class="u-date">{{ u.createdAt | date:'dd/MM/yyyy' }}</span>
+        <div class="u-actions">
+          <button class="action-btn secondary small" (click)="apriResetPassword(u.username)">
+            🔑 Reset pwd
+          </button>
+          <button class="action-btn danger small"
+                  (click)="eliminaUtente(u.username)"
+                  [disabled]="u.username === authService.currentUser?.username">
+            Elimina
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESET PASSWORD -->
+  <div *ngIf="resetPasswordUsername" class="card reset-card">
+    <h3>🔑 Reimposta password — <strong>{{ resetPasswordUsername }}</strong></h3>
+    <div class="form-row">
+      <input [(ngModel)]="resetPasswordValore" type="password"
+             class="input-field" placeholder="Nuova password"
+             (keyup.enter)="confermaResetPassword()" />
+      <button class="action-btn" (click)="confermaResetPassword()">Conferma</button>
+      <button class="action-btn secondary" (click)="resetPasswordUsername = ''">Annulla</button>
+    </div>
+    <p *ngIf="resetPasswordErrore" class="msg error">{{ resetPasswordErrore }}</p>
+    <p *ngIf="resetPasswordSuccesso" class="msg success">{{ resetPasswordSuccesso }}</p>
+  </div>
+
+</div>

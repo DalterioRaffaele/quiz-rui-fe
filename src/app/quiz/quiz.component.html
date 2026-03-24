@@ -3,13 +3,22 @@
   <!-- LOGIN -->
   <div *ngIf="!authService.isLoggedIn" class="login-section">
     <div class="card login-card">
-      <h1>Quiz RUI Pro</h1>
-      <p class="muted">Allenamento intelligente con statistiche, progressi ed errori.</p>
-      <input [(ngModel)]="loginUsername" class="input-field full-width"
-             placeholder="Username (admin = supervisor)"
-             (keyup.enter)="doLogin()" />
-      <button class="action-btn full-width" (click)="doLogin()" [disabled]="!loginUsername.trim()">ACCEDI</button>
-    </div>
+  <h1>Quiz RUI Pro</h1>
+  <p class="muted">Accedi per iniziare l'allenamento</p>
+  <input [(ngModel)]="loginUsername" class="input-field full-width"
+         placeholder="Username" />
+  <input [(ngModel)]="loginPassword" class="input-field full-width"
+         type="password" placeholder="Password"
+         (keyup.enter)="doLogin()" />
+  <p *ngIf="loginError" style="color:#f44336; font-size:13px; text-align:center;">
+    {{ loginError }}
+  </p>
+  <button class="action-btn full-width" (click)="doLogin()"
+          [disabled]="!loginUsername.trim() || !loginPassword.trim() || loginLoading">
+    {{ loginLoading ? 'Accesso in corso...' : 'ACCEDI' }}
+  </button>
+</div>
+
   </div>
 
   <!-- QUIZ -->

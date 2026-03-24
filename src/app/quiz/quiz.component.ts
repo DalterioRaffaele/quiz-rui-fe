@@ -29,7 +29,12 @@ export class QuizComponent implements OnInit {
   materie = signal<string[]>([]);
   selectedSettore = '';
   selectedMateria = '';
-  numDomande = 9;
+  numDomande = 20;
+  loginPassword = '';
+  loginError = '';
+  loginLoading = false;
+  private slideTimer: any;
+
 
   domande = signal<any[]>([]);
   risposte = signal<string[]>([]);           // ← signal
@@ -56,11 +61,24 @@ export class QuizComponent implements OnInit {
   }
 
   doLogin() {
-    if (this.loginUsername.trim()) {
-      this.authService.login(this.loginUsername);
-      setTimeout(() => { this.caricaSettori(); this.caricaProgressi(); }, 100);
+  if (!this.loginUsername.trim() || !this.loginPassword.trim()) return;
+  this.loginError = '';
+  this.loginLoading = true;
+  this.apiService.login(this.loginUsername, this.loginPassword).subscribe({
+    next: res => {
+      this.authService.loginWithToken(res.username, res.role, res.token);
+      this.loginLoading = false;
+      if (this.slideTimer) clearInterval(this.slideTimer);
+      this.caricaSettori();
+      this.caricaProgressi();
+    },
+    error: () => {
+      this.loginError = '❌ Username o password non validi';
+      this.loginLoading = false;
     }
-  }
+  });
+}
+
 
   setTab(tab: string) { this.activeTab = tab; }
   trackByIndex(index: number) { return index; }
