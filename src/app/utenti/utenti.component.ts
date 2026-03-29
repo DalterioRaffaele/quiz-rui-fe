@@ -75,12 +75,24 @@ export class UtentiComponent implements OnInit {
   }
 
   eliminaUtente(username: string) {
-    if (!confirm(`Eliminare l'utente "${username}"?`)) return;
-    this.apiService.deleteUtente(username).subscribe({
-      next: () => this.caricaUtenti(),
-      error: () => this.errore = 'Errore eliminazione utente'
-    });
-  }
+  if (!confirm(`Eliminare l'utente "${username}"?`)) return;
+
+  console.log('🗑️ Tentativo eliminazione utente:', username);
+
+  this.apiService.deleteUtente(username).subscribe({
+    next: (response) => {
+      console.log('✅ Eliminazione riuscita, risposta:', response);
+      this.caricaUtenti();
+    },
+    error: (err) => {
+      console.error('❌ Errore eliminazione utente:', err);
+      console.error('   Status:', err.status);
+      console.error('   Message:', err.message);
+      console.error('   Body:', err.error);
+      this.errore = 'Errore eliminazione utente';
+    }
+  });
+}
 
   apriResetPassword(username: string) {
     this.resetPasswordUsername = username;
