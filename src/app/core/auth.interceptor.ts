@@ -18,19 +18,21 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((err: HttpErrorResponse) => {
       console.log('🔴 CATCH ERROR:', err.status, err.url);
       if (err.status === 401) {
-        console.log('🔴 401 intercettato — eseguo logout');
-        const auth = inject(AuthService);
-        const router = inject(Router);
-        const notify = inject(NotificationService);
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  const notify = inject(NotificationService);
 
-        const msg = err.error?.code === 'SESSION_EXPIRED'
-          ? '⚠️ Sessione terminata: accesso da altro dispositivo.'
-          : 'Sessione scaduta. Effettua di nuovo il login.';
+  const msg = err.error?.code === 'SESSION_EXPIRED'
+    ? '⚠️ Sessione terminata: accesso da altro dispositivo.'
+    : 'Sessione scaduta. Effettua di nuovo il login.';
 
-        auth.logout(false);
-        notify.error(msg);
-        router.navigate(['/quiz']);
-      }
+  auth.logout(false);
+  
+  // ✅ Prima naviga, poi mostra lo snackbar
+  router.navigate(['/quiz']).then(() => {
+    notify.error(msg);
+  });
+}
       return throwError(() => err);
     })
   );
