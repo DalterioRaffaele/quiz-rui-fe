@@ -1,32 +1,33 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { tap } from 'rxjs';
-import { AuthService } from './auth.service';
+import { Injectable } from '@angular/core';
+import {
+  HttpInterceptor, HttpRequest, HttpHandler,
+  HttpEvent, HttpErrorResponse
+} from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
 
-export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = localStorage.getItem('quiz_token');
-  if (token) {
-    req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
-  }
+@Injectable({ providedIn: 'root' })
+export class AuthInterceptor implements HttpInterceptor {
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const token = localStorage.getItem('quiz_token');
+    if (token) {
+      req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+    }
 
-  return next(req).pipe(
-    tap({
-      error: (err: HttpErrorResponse) => {
-        if (err.status === 401) {
-          const auth = inject(AuthService);
+    return next.handle(req).pipe(
+      tap({
+        error: (err: HttpErrorResponse) => {
+          if (err.status === 401) {
+            const msg = err.error?.code === 'SESSION_EXPIRED'
+              ? '⚠️ Sessione terminata: accesso da altro dispositivo.'
+              : 'Sessione scaduta. Effettua di nuovo il login.';
 
-          const msg = err.error?.code === 'SESSION_EXPIRED'
-            ? '⚠️ Sessione terminata: accesso da altro dispositivo.'
-            : 'Sessione scaduta. Effettua di nuovo il login.';
-
-          localStorage.removeItem('quiz_token');
-          localStorage.removeItem('quiz_user');
-          auth.logout(false);
-
-          alert(msg);
-          window.location.href = '/quiz';
+            localStorage.removeItem('quiz_token');
+            localStorage.removeItem('quiz_user');
+            alert(msg);
+            window.location.href = '/quiz';
+          }
         }
-      }
-    })
-  );
-};
+      })
+    );
+  }
+}

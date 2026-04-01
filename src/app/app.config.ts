@@ -1,10 +1,11 @@
 import { ApplicationConfig, APP_INITIALIZER } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { routes } from './app.routes';
-import { authInterceptor } from './core/auth.interceptor';
+import { AuthInterceptor } from './core/auth.interceptor';
 import { AuthService } from './core/auth.service';
 
 function initAuth(authService: AuthService) {
@@ -15,7 +16,12 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideAnimationsAsync(),
-    provideHttpClient(withFetch(),withInterceptors([authInterceptor])),
+    provideHttpClient(),
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    },
     {
       provide: APP_INITIALIZER,
       useFactory: initAuth,
