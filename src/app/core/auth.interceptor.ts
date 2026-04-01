@@ -6,8 +6,9 @@ import { AuthService } from './auth.service';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const token = localStorage.getItem('quiz_token');
+  
+  console.log('INTERCEPTOR →', req.url, '| token:', token ? 'presente' : 'ASSENTE');
 
-  // Aggiunge il token JWT ad ogni richiesta
   const authReq = token
     ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
     : req;
@@ -15,8 +16,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
-        // Sessione scaduta o scalzata da altro dispositivo
-        authService.logout(false); // false = non richiamare /auth/logout (siamo già sloggati)
+        authService.logout(false);
       }
       return throwError(() => error);
     })
