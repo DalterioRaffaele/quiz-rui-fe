@@ -15,13 +15,18 @@ export class AuthService {
   constructor(private router: Router, private http: HttpClient) {}
 
 // auth.service.ts
-init(): Promise<void> {          // ← era void
-  const token = this.token; // invece di localStorage.getItem('quiz_token')
+init(): Promise<void> {
+  const token = localStorage.getItem('quiz_token');
   const saved = localStorage.getItem('quiz_user');
   if (token && saved) {
-    try { this.user.set(JSON.parse(saved)); } catch {}
+    try { 
+      this.user.set(JSON.parse(saved)); 
+    } catch {
+      localStorage.removeItem('quiz_token');
+      localStorage.removeItem('quiz_user');
+    }
   }
-  return Promise.resolve();      // ← aggiungi questa riga
+  return Promise.resolve();
 }
 
   loginWithToken(username: string, role: string, token: string): void {

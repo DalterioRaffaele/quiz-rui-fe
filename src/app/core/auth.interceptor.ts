@@ -1,4 +1,3 @@
-// auth.interceptor.ts
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
@@ -8,9 +7,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = localStorage.getItem('quiz_token');
+  
   if (token) {
     req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
-  }
+  } // ← parentesi di chiusura if
 
   return next(req).pipe(
     catchError((err: HttpErrorResponse) => {
@@ -24,12 +24,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           : 'Sessione scaduta. Effettua di nuovo il login.';
 
         auth.logout(false);
-
-        snackBar.open(msg, 'Chiudi', {
-          duration: 6000,
-          panelClass: ['snackbar-error']
-        });
-
+        snackBar.open(msg, 'Chiudi', { duration: 6000, panelClass: ['snackbar-error'] });
         router.navigate(['/quiz']);
       }
       return throwError(() => err);
