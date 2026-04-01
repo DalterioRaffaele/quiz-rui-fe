@@ -88,27 +88,27 @@ export class QuizComponent implements OnInit {
   }
 
   // ── LOGIN (usato dal nuovo HTML con login()) ──
-  login() {
-    const u = this.username || this.loginUsername;
-    const p = this.password || this.loginPassword;
-    if (!u.trim() || !p.trim()) return;
-    this.errorMsg = '';
-    this.loading = true;
-    this.apiService.login(u, p).subscribe({
-      next: res => {
-        this.authService.loginWithToken(res.username, res.role, res.token);
-        this.loading = false;
-        this.showLogin = false;
-        if (this.slideTimer) clearInterval(this.slideTimer);
-        this.caricaSettori();
-        this.caricaProgressi();
-      },
-      error: () => {
-        this.errorMsg = 'Username o password non validi';
-        this.loading = false;
-      }
-    });
-  }
+ login() {
+  const u = this.username || this.loginUsername;
+  const p = this.password || this.loginPassword;
+  if (!u.trim() || !p.trim()) return;
+  this.errorMsg = '';
+  this.loading = true;
+  this.apiService.login(u, p).subscribe({
+    next: res => {
+      this.authService.loginWithToken(res.username, res.role, res.token);
+      this.loading = false;
+      this.showLogin = false;
+      if (this.slideTimer) clearInterval(this.slideTimer);
+      this.caricaSettori();
+      this.caricaProgressi();
+    },
+    error: () => {
+      this.errorMsg = 'Username o password non validi';
+      this.loading = false;
+    }
+  });
+}
 
   // alias per compatibilità vecchio HTML
   doLogin() { this.login(); }
