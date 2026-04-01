@@ -9,9 +9,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { ApiService } from '../core/api.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-quiz',
@@ -75,7 +76,8 @@ export class QuizComponent implements OnInit {
 
   constructor(
     public authService: AuthService,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -299,38 +301,40 @@ isOpzioneCorretta(op: any): boolean {
     return this.risultati().filter(r => r === 'correct').length;
   }
 
-  salvaRisposte() {
-  const totale = this.domandeCount();
-  const corrette = this.punteggio;
+salvaRisposte() {
   const domande = this.domande();
   const risultatiArr = this.risultati();
 
-  domande.forEach((d, i) => {
-    if (risultatiArr[i]) {
-      const progressoCorrente = this.progressi[String(d.numero)] || { correct: 0, wrong: 0 };
-      const isCorrect = risultatiArr[i] === 'correct';
-      const isWrong = risultatiArr[i] === 'wrong';
+  const salvataggi = domande.reduce((acc: any[], d, i) => {
+    if (!risultatiArr[i]) return acc;
+    const progressoCorrente = this.progressi[String(d.numero)] || { correct: 0, wrong: 0 };
+    const isCorrect = risultatiArr[i] === 'correct';
+    const isWrong = risultatiArr[i] === 'wrong';
 
-      const payload = {
-        numero: d.numero,
-        domanda: d.testo || d.domanda || '',
-        materia: d.materia || '',
-        settore: d.settore || '',
-        seen: true,
-        correct: (progressoCorrente.correct || 0) + (isCorrect ? 1 : 0),
-        // ← se risposta corretta in modalità errori, azzera wrong
-        wrong: this.mode === 'errors' && isCorrect
-          ? 0
-          : (progressoCorrente.wrong || 0) + (isWrong ? 1 : 0),
-        lastResult: risultatiArr[i]
-      };
+    acc.push(this.apiService.saveProgresso({
+      numero: d.numero,
+      domanda: d.testo || d.domanda || '',
+      materia: d.materia || '',
+      settore: d.settore || '',
+      seen: true,
+      correct: (progressoCorrente.correct || 0) + (isCorrect ? 1 : 0),
+      wrong: this.mode === 'errors' && isCorrect
+        ? 0
+        : (progressoCorrente.wrong || 0) + (isWrong ? 1 : 0),
+      lastResult: risultatiArr[i]
+    }));
+    return acc;
+  }, []);
 
-      this.apiService.saveProgresso(payload).subscribe();
-    }
+  if (!salvataggi.length) {
+    this.router.navigate(['/progressi']);
+    return;
+  }
+
+  forkJoin(salvataggi).subscribe({
+    next: () => this.router.navigate(['/progressi']),
+    error: () => alert('Errore nel salvataggio dei progressi')
   });
-
-  alert(`✅ Quiz completato! ${corrette}/${totale} corrette`);
-  this.caricaProgressi();
 }
 
 

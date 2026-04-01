@@ -1,5 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 export interface User {
   username: string;
@@ -10,7 +12,7 @@ export interface User {
 export class AuthService {
   private user = signal<User | null>(null);
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private http: HttpClient) {}
 
   init(): void {
     const token = localStorage.getItem('quiz_token');
@@ -27,7 +29,14 @@ export class AuthService {
     localStorage.setItem('quiz_user', JSON.stringify(u));
   }
 
-  logout(): void {
+  logout(notify = true): void {
+    const token = localStorage.getItem('quiz_token');
+    // Chiama il BE per invalidare il sessionToken nel DB
+    if (token && notify) {
+      this.http.post(`${environment.apiUrl}/auth/logout`, {}).subscribe({
+        error: () => {} // ignora errori di rete — puliamo comunque
+      });
+    }
     this.user.set(null);
     localStorage.removeItem('quiz_token');
     localStorage.removeItem('quiz_user');
