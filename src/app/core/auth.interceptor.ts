@@ -1,9 +1,8 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { catchError, throwError } from 'rxjs';
+import { catchError, tap, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { NotificationService } from './notification.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
@@ -13,8 +12,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   return next(req).pipe(
+    tap({
+      error: (err) => console.log('🔴 TAP ERROR:', err.status, err.url)
+    }),
     catchError((err: HttpErrorResponse) => {
+      console.log('🔴 CATCH ERROR:', err.status, err.url);
       if (err.status === 401) {
+        console.log('🔴 401 intercettato — eseguo logout');
         const auth = inject(AuthService);
         const router = inject(Router);
         const notify = inject(NotificationService);
@@ -27,7 +31,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         notify.error(msg);
         router.navigate(['/quiz']);
       }
-      return throwError(() => err); // ← rilancia sempre
+      return throwError(() => err);
     })
   );
 };
