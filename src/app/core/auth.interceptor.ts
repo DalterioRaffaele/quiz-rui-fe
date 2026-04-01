@@ -5,9 +5,7 @@ import { AuthService } from './auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
-  const token = localStorage.getItem('quiz_token');
-  
-  console.log('INTERCEPTOR →', req.url, '| token:', token ? 'presente' : 'ASSENTE');
+  const token = authService.token; // ✅ via service, no localStorage diretto
 
   const authReq = token
     ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })

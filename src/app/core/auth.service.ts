@@ -14,13 +14,15 @@ export class AuthService {
 
   constructor(private router: Router, private http: HttpClient) {}
 
-  init(): void {
-    const token = localStorage.getItem('quiz_token');
-    const saved = localStorage.getItem('quiz_user');
-    if (token && saved) {
-      try { this.user.set(JSON.parse(saved)); } catch {}
-    }
+// auth.service.ts
+init(): Promise<void> {          // ← era void
+  const token = this.token; // invece di localStorage.getItem('quiz_token')
+  const saved = localStorage.getItem('quiz_user');
+  if (token && saved) {
+    try { this.user.set(JSON.parse(saved)); } catch {}
   }
+  return Promise.resolve();      // ← aggiungi questa riga
+}
 
   loginWithToken(username: string, role: string, token: string): void {
     const u: User = { username, role: role as User['role'] };

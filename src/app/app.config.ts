@@ -8,7 +8,7 @@ import { authInterceptor } from './core/auth.interceptor';
 import { AuthService } from './core/auth.service';
 
 function initAuth(authService: AuthService) {
-  return () => authService.init();
+  return () => authService.init(); // ora restituisce Promise<void> ✅
 }
 
 export const appConfig: ApplicationConfig = {
