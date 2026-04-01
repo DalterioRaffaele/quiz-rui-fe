@@ -1,22 +1,38 @@
+// auth.interceptor.ts
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
+import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const authService = inject(AuthService);
-  const token = authService.token; // ✅ via service, no localStorage diretto
+  const token = localStorage.getItem('quiz_token');
+  if (token) {
+    req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+  }
 
-  const authReq = token
-    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
-    : req;
+  return next(req).pipe(
+    catchError((err: HttpErrorResponse) => {
+      if (err.status === 401) {
+        const auth = inject(AuthService);
+        const router = inject(Router);
+        const snackBar = inject(MatSnackBar);
 
-  return next(authReq).pipe(
-    catchError((error: HttpErrorResponse) => {
-      if (error.status === 401) {
-        authService.logout(false);
+        const msg = err.error?.code === 'SESSION_EXPIRED'
+          ? '⚠️ Sessione terminata: hai effettuato accesso da un altro dispositivo.'
+          : 'Sessione scaduta. Effettua di nuovo il login.';
+
+        auth.logout(false);
+
+        snackBar.open(msg, 'Chiudi', {
+          duration: 6000,
+          panelClass: ['snackbar-error']
+        });
+
+        router.navigate(['/quiz']);
       }
-      return throwError(() => error);
+      return throwError(() => err);
     })
   );
 };
