@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
+import { EMPTY } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -8,56 +10,84 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  // ── AUTH ──
-  login(username: string, password: string): Observable<{ token: string; username: string; role: string }> {
-    return this.http.post<any>(`${this.baseUrl}/auth/login`, { username, password });
+  private get headers(): { headers: HttpHeaders } {
+    const token = localStorage.getItem('quiz_token');
+    return {
+      headers: new HttpHeaders({ Authorization: `Bearer ${token ?? ''}` })
+    };
   }
 
-  register(username: string, password: string, role = 'limited'): Observable<{ ok: boolean }> {
-    return this.http.post<any>(`${this.baseUrl}/auth/register`, { username, password, role });
+  private handle401<T>(obs: Observable<T>): Observable<T> {
+    return obs.pipe(
+      catchError(err => {
+        if (err.status === 401) {
+          localStorage.removeItem('quiz_token');
+          localStorage.removeItem('quiz_user');
+          window.location.href = '/quiz';
+        }
+        throw err;
+      })
+    );
+  }
+
+  // ── AUTH ──
+  login(username: string, password: string) {
+    return this.http.post<{ token: string; username: string; role: string }>(
+      `${this.baseUrl}/auth/login`, { username, password }
+    );
+  }
+
+  register(username: string, password: string, role = 'limited') {
+    return this.handle401(
+      this.http.post<{ ok: boolean }>(`${this.baseUrl}/auth/register`, { username, password, role }, this.headers)
+    );
   }
 
   getUtenti(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/auth/utenti`);
+    return this.handle401(this.http.get<any[]>(`${this.baseUrl}/auth/utenti`, this.headers));
   }
 
-  deleteUtente(username: string): Observable<{ ok: boolean }> {
-    return this.http.delete<any>(`${this.baseUrl}/auth/utenti/${username}`);
+  deleteUtente(username: string) {
+    return this.handle401(this.http.delete<{ ok: boolean }>(`${this.baseUrl}/auth/utenti/${username}`, this.headers));
   }
 
-  resetPassword(username: string, newPassword: string): Observable<{ ok: boolean }> {
-    return this.http.put<any>(`${this.baseUrl}/auth/utenti/${username}/password`, { newPassword });
+  resetPassword(username: string, newPassword: string) {
+    return this.handle401(
+      this.http.put<{ ok: boolean }>(`${this.baseUrl}/auth/utenti/${username}/password`, { newPassword }, this.headers)
+    );
   }
 
   // ── DOMANDE ──
   getSettori(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.baseUrl}/settori`);
+    return this.handle401(this.http.get<string[]>(`${this.baseUrl}/settori`, this.headers));
   }
 
   getMaterie(settore: string): Observable<string[]> {
     const params = new HttpParams().set('settore', settore);
-    return this.http.get<string[]>(`${this.baseUrl}/materie`, { params });
+    return this.handle401(this.http.get<string[]>(`${this.baseUrl}/materie`, { ...this.headers, params }));
   }
 
-  getDomande(settore: string, materia: string, size: number = 9): Observable<any[]> {
+  getDomande(settore: string, materia: string, size = 9): Observable<any[]> {
     const params = new HttpParams().set('settore', settore).set('materia', materia).set('size', size.toString());
-    return this.http.get<any[]>(`${this.baseUrl}/domande`, { params });
+    return this.handle401(this.http.get<any[]>(`${this.baseUrl}/domande`, { ...this.headers, params }));
   }
 
   // ── PROGRESSI ──
   getProgressi(): Observable<Record<string, any>> {
-    return this.http.get<Record<string, any>>(`${this.baseUrl}/progressi`);
+    return this.handle401(this.http.get<Record<string, any>>(`${this.baseUrl}/progressi`, this.headers));
   }
 
-  saveProgresso(payload: any): Observable<{ ok: boolean }> {
-    return this.http.post<any>(`${this.baseUrl}/progressi`, payload);
+  saveProgresso(payload: any) {
+    return this.handle401(this.http.post<{ ok: boolean }>(`${this.baseUrl}/progressi`, payload, this.headers));
   }
 
-  resetProgressi(): Observable<{ ok: boolean }> {
-    return this.http.delete<any>(`${this.baseUrl}/progressi`);
+  resetProgressi() {
+    return this.handle401(this.http.delete<{ ok: boolean }>(`${this.baseUrl}/progressi`, this.headers));
   }
 
   getDomandeByNumeri(numeri: number[]): Observable<any[]> {
-    return this.http.post<any[]>(`${this.baseUrl}/domande/by-numeri`, { numeri });
+    return this.handle401(
+      this.http.post<any[]>(`${this.baseUrl}/domande/by-numeri`, { numeri }, this.headers)
+    );
   }
 }
