@@ -24,7 +24,6 @@ export class AppComponent implements OnInit {
   isMobile = false;
 
   constructor(public authService: AuthService) {
-    this.authService.init();
   }
 
   ngOnInit() {

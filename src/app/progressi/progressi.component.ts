@@ -17,7 +17,11 @@ export class ProgressiComponent implements OnInit {
 
   constructor(private apiService: ApiService, public authService: AuthService) {}
 
-  ngOnInit() { this.caricaProgressi(); }
+  ngOnInit() {
+  if (this.authService.isLoggedIn) {
+    this.caricaProgressi();
+  }
+}
 
   caricaProgressi() {
     this.apiService.getProgressi().subscribe({

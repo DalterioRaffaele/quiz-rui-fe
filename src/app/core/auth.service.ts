@@ -47,4 +47,7 @@ export class AuthService {
   get isLoggedIn() { return !!this.user(); }
   get isSupervisor() { return this.user()?.role === 'supervisor'; }
   get username() { return this.user()?.username || ''; }
+  get token(): string | null {
+  return localStorage.getItem('quiz_token');
+}
 }
