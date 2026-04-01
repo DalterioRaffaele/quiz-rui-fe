@@ -18,17 +18,19 @@ export class ApiService {
   }
 
   private handle401<T>(obs: Observable<T>): Observable<T> {
-    return obs.pipe(
-      catchError(err => {
-        if (err.status === 401) {
-          localStorage.removeItem('quiz_token');
-          localStorage.removeItem('quiz_user');
-          window.location.href = '/quiz';
-        }
-        throw err;
-      })
-    );
-  }
+  return obs.pipe(
+    catchError(err => {
+      console.log('🔴 handle401 chiamato - status:', err.status, 'error:', err.error);
+      if (err.status === 401) {
+        console.log('🚪 Eseguo logout...');
+        localStorage.removeItem('quiz_token');
+        localStorage.removeItem('quiz_user');
+        window.location.href = '/quiz';
+      }
+      throw err;
+    })
+  );
+}
 
   // ── AUTH ──
   login(username: string, password: string) {
