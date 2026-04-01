@@ -17,17 +17,17 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       if (err.status === 401) {
         const auth = inject(AuthService);
         const router = inject(Router);
-        const notify = inject(NotificationService); // ← inietta il servizio
+        const notify = inject(NotificationService);
 
         const msg = err.error?.code === 'SESSION_EXPIRED'
           ? '⚠️ Sessione terminata: accesso da altro dispositivo.'
           : 'Sessione scaduta. Effettua di nuovo il login.';
 
         auth.logout(false);
-        notify.error(msg); // ← chiamata pulita
+        notify.error(msg);
         router.navigate(['/quiz']);
       }
-      return throwError(() => err);
+      return throwError(() => err); // ← rilancia sempre
     })
   );
 };
