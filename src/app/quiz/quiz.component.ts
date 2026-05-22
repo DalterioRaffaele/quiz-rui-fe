@@ -107,12 +107,12 @@ export class QuizComponent implements OnInit {
       this.caricaProgressi();
     },
     error: err => {
-      if (err.status === 409 && err.error?.code === 'ALREADY_LOGGED_IN') {
+      if (err.status === 409) {
         this.errorMsg = "Utente già in uso, chiudere l'altra sessione";
       } else if (err.status === 401) {
         this.errorMsg = 'Username o password non validi';
       } else {
-        this.errorMsg = 'Errore durante il login';
+        this.errorMsg = err?.error?.error || 'Errore durante il login';
       }
 
       this.loading = false;
