@@ -108,6 +108,26 @@ export class QuizComponent implements OnInit {
     },
     error: err => {
       if (err.status === 409) {
+        const forzaAccesso = window.confirm("Utente già in uso. Vuoi chiudere l'altra sessione e continuare?");
+
+        if (forzaAccesso) {
+          this.apiService.login(u, p, true).subscribe({
+            next: res => {
+              this.authService.loginWithToken(res.username, res.role, res.token);
+              this.loading = false;
+              this.showLogin = false;
+              if (this.slideTimer) clearInterval(this.slideTimer);
+              this.caricaSettori();
+              this.caricaProgressi();
+            },
+            error: retryErr => {
+              this.errorMsg = retryErr?.error?.error || 'Impossibile chiudere la sessione precedente';
+              this.loading = false;
+            }
+          });
+          return;
+        }
+
         this.errorMsg = "Utente già in uso, chiudere l'altra sessione";
       } else if (err.status === 401) {
         this.errorMsg = 'Username o password non validi';
