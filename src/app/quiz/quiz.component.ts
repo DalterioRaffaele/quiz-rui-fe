@@ -91,9 +91,12 @@ export class QuizComponent implements OnInit {
  login() {
   const u = this.username || this.loginUsername;
   const p = this.password || this.loginPassword;
+
   if (!u.trim() || !p.trim()) return;
+
   this.errorMsg = '';
   this.loading = true;
+
   this.apiService.login(u, p).subscribe({
     next: res => {
       this.authService.loginWithToken(res.username, res.role, res.token);
@@ -103,8 +106,15 @@ export class QuizComponent implements OnInit {
       this.caricaSettori();
       this.caricaProgressi();
     },
-    error: () => {
-      this.errorMsg = 'Username o password non validi';
+    error: err => {
+      if (err.status === 409 && err.error?.code === 'ALREADY_LOGGED_IN') {
+        this.errorMsg = "Utente già in uso, chiudere l'altra sessione";
+      } else if (err.status === 401) {
+        this.errorMsg = 'Username o password non validi';
+      } else {
+        this.errorMsg = 'Errore durante il login';
+      }
+
       this.loading = false;
     }
   });
