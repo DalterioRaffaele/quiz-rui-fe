@@ -92,4 +92,8 @@ export class ApiService {
       this.http.post<any[]>(`${this.baseUrl}/domande/by-numeri`, { numeri }, this.headers)
     );
   }
+
+  pingSession(): Observable<any> {
+    return this.http.post(`${this.baseUrl}/auth/ping`, {});
+  }
 }

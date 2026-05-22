@@ -11,50 +11,101 @@ export interface User {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private user = signal<User | null>(null);
+  private pingIntervalId: ReturnType<typeof setInterval> | null = null;
+  private readonly pingEveryMs = 30000; // 30 secondi
 
   constructor(private router: Router, private http: HttpClient) {}
 
-// auth.service.ts
-init(): Promise<void> {
-  const token = localStorage.getItem('quiz_token');
-  const saved = localStorage.getItem('quiz_user');
-  if (token && saved) {
-    try { 
-      this.user.set(JSON.parse(saved)); 
-    } catch {
-      localStorage.removeItem('quiz_token');
-      localStorage.removeItem('quiz_user');
+  init(): Promise<void> {
+    const token = localStorage.getItem('quiz_token');
+    const saved = localStorage.getItem('quiz_user');
+
+    if (token && saved) {
+      try {
+        this.user.set(JSON.parse(saved));
+        this.startPing();
+      } catch {
+        localStorage.removeItem('quiz_token');
+        localStorage.removeItem('quiz_user');
+        this.stopPing();
+      }
     }
+
+    return Promise.resolve();
   }
-  return Promise.resolve();
-}
 
   loginWithToken(username: string, role: string, token: string): void {
     const u: User = { username, role: role as User['role'] };
     this.user.set(u);
     localStorage.setItem('quiz_token', token);
     localStorage.setItem('quiz_user', JSON.stringify(u));
+    this.startPing();
   }
 
   logout(notify = true): void {
     const token = localStorage.getItem('quiz_token');
-    // Chiama il BE per invalidare il sessionToken nel DB
+
+    this.stopPing();
+
     if (token && notify) {
       this.http.post(`${environment.apiUrl}/auth/logout`, {}).subscribe({
-        error: () => {} // ignora errori di rete — puliamo comunque
+        next: () => {},
+        error: () => {}
       });
     }
+
     this.user.set(null);
     localStorage.removeItem('quiz_token');
     localStorage.removeItem('quiz_user');
     this.router.navigate(['/quiz']);
   }
 
-  get currentUser() { return this.user(); }
-  get isLoggedIn() { return !!this.user(); }
-  get isSupervisor() { return this.user()?.role === 'supervisor'; }
-  get username() { return this.user()?.username || ''; }
+  private startPing(): void {
+    this.stopPing();
+
+    this.pingIntervalId = setInterval(() => {
+      const token = localStorage.getItem('quiz_token');
+
+      if (!token || !this.user()) {
+        this.stopPing();
+        return;
+      }
+
+      this.http.post(`${environment.apiUrl}/auth/ping`, {}).subscribe({
+        next: () => {},
+        error: (err) => {
+          if (err?.status === 401) {
+            this.logout(false);
+          }
+        }
+      });
+    }, this.pingEveryMs);
+  }
+
+  private stopPing(): void {
+    if (this.pingIntervalId) {
+      clearInterval(this.pingIntervalId);
+      this.pingIntervalId = null;
+    }
+  }
+
+  get currentUser() {
+    return this.user();
+  }
+
+  get isLoggedIn() {
+    return !!this.user();
+  }
+
+  get isSupervisor() {
+    return this.user()?.role === 'supervisor';
+  }
+
+  get username() {
+    return this.user()?.username || '';
+  }
+
   get token(): string | null {
-  return localStorage.getItem('quiz_token');
-}
+    return localStorage.getItem('quiz_token');
+  }
 }
