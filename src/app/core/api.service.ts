@@ -98,6 +98,6 @@ export class ApiService {
   }
 
   pingSession(): Observable<any> {
-    return this.http.post(`${this.baseUrl}/auth/ping`, {});
+    return this.http.post(`${this.baseUrl}/auth/ping`, {}, this.headers);
   }
 }

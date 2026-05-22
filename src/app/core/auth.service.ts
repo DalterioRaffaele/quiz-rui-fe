@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
 export interface User {
@@ -18,6 +18,13 @@ export class AuthService {
     private router: Router,
     private http: HttpClient
   ) {}
+
+  private authOptions() {
+    const token = localStorage.getItem('quiz_token');
+    return {
+      headers: new HttpHeaders({ Authorization: `Bearer ${token ?? ''}` })
+    };
+  }
 
   init(): Promise<void> {
     const token = localStorage.getItem('quiz_token');
@@ -55,7 +62,7 @@ export class AuthService {
     this.stopPing();
 
     if (token && notify) {
-      this.http.post(`${environment.apiUrl}/auth/logout`, {}).subscribe({
+      this.http.post(`${environment.apiUrl}/auth/logout`, {}, this.authOptions()).subscribe({
         next: () => {},
         error: () => {}
       });
@@ -78,7 +85,7 @@ export class AuthService {
         return;
       }
 
-      this.http.post(`${environment.apiUrl}/auth/ping`, {}).subscribe({
+      this.http.post(`${environment.apiUrl}/auth/ping`, {}, this.authOptions()).subscribe({
         next: () => {},
         error: (err) => {
           if (err?.status === 401) {
