@@ -14,7 +14,10 @@ export class AuthService {
   private pingIntervalId: ReturnType<typeof setInterval> | null = null;
   private readonly pingEveryMs = 30000; // 30 secondi
 
-  constructor(private router: Router, private http: HttpClient) {}
+  constructor(
+    private router: Router,
+    private http: HttpClient
+  ) {}
 
   init(): Promise<void> {
     const token = localStorage.getItem('quiz_token');
@@ -22,7 +25,7 @@ export class AuthService {
 
     if (token && saved) {
       try {
-        this.user.set(JSON.parse(saved));
+        this.user.set(JSON.parse(saved) as User);
         this.startPing();
       } catch {
         localStorage.removeItem('quiz_token');
@@ -35,7 +38,11 @@ export class AuthService {
   }
 
   loginWithToken(username: string, role: string, token: string): void {
-    const u: User = { username, role: role as User['role'] };
+    const u: User = {
+      username,
+      role: role as User['role']
+    };
+
     this.user.set(u);
     localStorage.setItem('quiz_token', token);
     localStorage.setItem('quiz_user', JSON.stringify(u));
@@ -83,7 +90,7 @@ export class AuthService {
   }
 
   private stopPing(): void {
-    if (this.pingIntervalId) {
+    if (this.pingIntervalId !== null) {
       clearInterval(this.pingIntervalId);
       this.pingIntervalId = null;
     }
