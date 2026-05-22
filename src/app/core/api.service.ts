@@ -34,10 +34,14 @@ export class ApiService {
 
   // ── AUTH ──
   login(username: string, password: string) {
-    return this.http.post<{ token: string; username: string; role: string }>(
-      `${this.baseUrl}/auth/login`, { username, password }
-    );
-  }
+  console.log('AUTH baseUrl:', this.baseUrl);
+  console.log('LOGIN url:', `${this.baseUrl}/auth/login`);
+
+  return this.http.post<{ token: string; username: string; role: string }>(
+    `${this.baseUrl}/auth/login`,
+    { username, password }
+  );
+}
 
   register(username: string, password: string, role = 'limited') {
     return this.handle401(
